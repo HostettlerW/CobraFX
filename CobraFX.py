@@ -35,7 +35,6 @@ class StaticAnimation():
         for i in range(self.frameCount):
             self.frameMap.append(i * self.frameDelay)
 
-        print(self.frameMap)
 
     # Pushes the logic forward in the animation, should be called every frame
     # Will return the correct image according to its internal FPS
