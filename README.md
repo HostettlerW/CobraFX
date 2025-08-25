@@ -1,14 +1,10 @@
-# CobraFX
-Graphics classes for pygame. Animations, Customizable SVG, Progress Bars.
+# CobraSuite
+A collection of python libaries to aid in development with Pygame. 
 
-## Release 1
+## Modules
 
-### Features
+### CobraFX
+Graphics library. Handles animations, svg images with on-the-fly color reprogramming, and simple progress bars.
 
-Static Animation: Loads a folder of animation frames. Can play at framerates independent of window. Animation can be scaled.
-
-Dynamic Animation: A container of static animations. Useful for character animation.
-
-SVG Image: Pygame already supports SVG, but this class allows on the fly editing of color data.
-
-Progress Bar: A simple progress bar. Takes progress from 0 - 100.
+### CobraRender
+Provides resolution management tools to pygame. Since pygame x/y coordinates are determined by the resolution of the window, programming for multiple resolutions presents a challenge when trying to place game objects. With CobraRender, a frame can be drawn on a pygame surface at a set size (1080p recomended), and then the WindowManager object will scale that frame to your windows true resolution. This takes the place of your standard pygame flip() function. WindowManager also takes on the role of providing a pygame fps clock and window renaming.
