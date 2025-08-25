@@ -1,4 +1,5 @@
 import pygame
+import ctypes
 
 # FlexRender for Pygame
 # William Hostettler. 2025.
@@ -57,3 +58,10 @@ class WindowManager:
     # Sets windowed resolution to user defined parameters.
     def customRes(self, newWidth: int, newHeight: int):
         self.outputSurface = pygame.display.set_mode((newWidth, newHeight))
+
+# On laptops, Windows is probably using a screen scale over 100%. Calling this function will make the thread DPI aware, allowing for accurate window sizes.
+def windowsScaleAware():
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception as e:
+        error("Windows User32 Process", "Could not activate DPI awareness for thread.")
