@@ -1,17 +1,17 @@
 import pygame
 import ctypes
 
-# FlexRender for Pygame
+# CobraRender for Pygame
 # William Hostettler. 2025.
 
 # Standardized method of raising an error in this library.
 def error(obj: str, problem: str):
-    eString = "ERROR! (FlexRender) "
+    eString = "ERROR! (CobraRender) "
     eString = eString + obj + ": " + problem
     print(eString)
     return eString
 
-# Primary class of FlexRender.
+# Primary class of CobraRender.
 # WindowManager acts as a middleman between pygame screen functions and the game surface. REPLACES the flip() function.
 # The goal is to allow a game to render frames to one internal surface at a set resolution, then pass that surface to WM for scaling to desired resolution.
 class WindowManager:
