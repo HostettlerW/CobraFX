@@ -1,5 +1,6 @@
 import pygame
 from io import BytesIO
+import os
 
 # Will Hostettler
 # Version 1
@@ -141,3 +142,131 @@ class ProgressBar:
         percent = float(self.prog) / 100.0
         calcWidth = int(float(self.w) * percent)
         pygame.draw.rect(self.screenRef, self.colorFR, (self.x, self.y, calcWidth, self.h))
+
+
+
+
+# Tile Based Rendering Object
+# Texture ID 0 is reserved for blank
+class TileMap:
+
+    # Internal Class for each layer of the map
+    class TileLayer:
+        def __init__(self, width: int, height: int):
+            self.data = []
+            for i in range(height):
+                row = []
+                for i in range(width):
+                    row.append(0)
+                self.data.append(row)
+            self.width = width
+            self.height = height
+            self.show = True
+        def cell(self, x: int, y: int, newData: int):
+            self.data[y][x] = newData
+        def fill(self, newData: int):
+            for row in range(self.height):
+                for col in range(self.width):
+                    self.data[row][col] = newData
+        def render(self, surface, position: tuple, size: int, imageList: list):
+            startX = position[0]
+            startY = position[1]
+            activeImages = []
+            for image in imageList:
+                resize = pygame.transform.scale(image, (size, size))
+                activeImages.append(resize)
+            for row in range(self.height):
+                for col in range(self.width):
+                    currentX = startX + (col * size)
+                    currentY = startY + (row * size)
+                    textureID = self.data[row][col] - 1
+                    # minus one because ID 1 should belong to item 0 of list. item 0 is reserved for blank
+                    if not (textureID == -1):
+                        surface.blit(activeImages[textureID], (currentX, currentY))
+        def hide(self):
+            self.show = False
+        def reveal(self):
+            self.show = True
+
+    # Internal Function to load a file as a pygame image
+    def getImage(self, path: str, textureName: str):
+            filepath = path + "/" + textureName
+            image = pygame.image.load(filepath).convert_alpha()
+            return image
+    
+    def registerTextures(self, path: str):
+        contents = sorted(os.listdir(path))
+        output = []
+        for filename in contents:
+            output.append(self.getImage(path, filename))
+        return output
+
+    # Takes a pygame surface, width and height measured in tiles (cells), amount of layers, starting position, size of each cell in pixels, filepath to textures folder
+    def __init__(self, surface, width: int, height: int, layerCount: int, position: tuple, size: int, texturePath: str):
+        self.surface = surface
+        self.layers = []
+        for i in range(layerCount):
+            self.layers.append(self.TileLayer(width, height))
+        self.position = position
+        self.size = size
+        self.texturePath = texturePath
+        self.textures = self.registerTextures(texturePath)
+        self.width = width
+        self.height = height
+
+    # Renders to the given surface
+    def render(self):
+        for layer in self.layers:
+            if layer.show == True:
+                layer.render(self.surface, self.position, self.size, self.textures)
+
+    # Edits one cells data in one layer
+    def editCell(self, layer: int, x: int, y: int, newData: int):
+        self.layers[layer].cell(x, y, newData)
+
+    # Fills all data in one layer
+    def fill(self, layer: int, newData: int):
+        self.layers[layer].fill(newData)
+
+    # Takes a screen coordinate and returns which cell the coord resides in
+    def airspace(self, screenX: int, screenY: int):
+        valid = False
+        cellX = 0
+        cellY = 0
+        # Determines validity:
+        maximumX = self.position[0] + (self.size * self.width)
+        maximumY = self.position[1] + (self.size * self.height)
+        if (screenX >= self.position[0]) and (screenX <= maximumX):
+            if (screenY >= self.position[1]) and (screenY <= maximumY):
+                valid = True
+
+        # If postition is within tilemap:
+        if valid:
+            for row in range(self.height):
+                    for col in range(self.width):
+                        currentX = self.position[0] + (col * self.size)
+                        currentY = self.position[1] + (row * self.size)
+                        maximumX = currentX + self.size
+                        maximumY = currentY + self.size
+                        if (screenX >= currentX) and (screenX <= maximumX):
+                            if (screenY >= currentY) and (screenY <= maximumY):
+                                cellX = col
+                                cellY = row
+        
+        return (valid, cellX, cellY)
+
+    # Returns textures as a list of images
+    def getTextures(self):
+        return self.textures
+    
+    # Returns data in given cell on given layer
+    def getCellData(self, layer: int, x: int, y: int):
+        return self.layers[layer].data[y][x]
+    
+    # Replaces entire layer's data. Takes a 2D list as input, should match the width and height declared
+    def replaceData(self, layer: int, newData: list):
+        self.layers[layer].data = newData
+
+    # Returns layer data
+    def dumpData(self, layer: int):
+        return self.layers[layer].data
